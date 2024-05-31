@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { apiKey, orgKey } from '../config/index.js';
 
 import { samplePrompt, weightAgePrompt } from './constants.js';
 import { getInstructionsForHighestQuotePrice, getInstructionsForHigherQuotePrice, getInstructionsForHighQuotePrice } from './helper.js';
@@ -6,9 +7,7 @@ import { getInstructionsForHighestQuotePrice, getInstructionsForHigherQuotePrice
 const openAiService = {};
 
 
-const apiKey = process.env.OPEN_AI_API_KEY;
-const OrgKey = process.env.OPEN_AI_ORGANISATION_KEY;
-
+console.log(process.env.OPEN_AI_API_KEY)
 const generateInstruction = (weightage) => {
   const conditions = `
   Quoted price is 2500$,
@@ -56,7 +55,7 @@ const extractPriceDifferent = async (message, samples) => {
   please provide the output in the above mentined format and please do not added currency symbol or anything in the output(Target price and Quoted price)
   `;
   const openai = new OpenAI({
-    organization: OrgKey,
+    organization: orgKey,
     apiKey: apiKey
   });
   const res = await openai.chat.completions.create({
@@ -88,7 +87,7 @@ const extractPriceDifferent = async (message, samples) => {
 const createAssistant = async (prompt) => {
   // const instructions = generateInstruction(weightage);
   const openai = new OpenAI({
-    organization: OrgKey,
+    organization: orgKey,
     apiKey: apiKey
   });
   const myAssistant = await openai.beta.assistants.create({
@@ -102,7 +101,7 @@ const createAssistant = async (prompt) => {
 
 const createThread = async () => {
   const openai = new OpenAI({
-    organization: OrgKey,
+    organization: orgKey,
     apiKey: apiKey
   });
   const emptyThread = await openai.beta.threads.create();
@@ -112,7 +111,7 @@ const createThread = async () => {
 
 const postMessage = async (message, threadId) => {
   const openai = new OpenAI({
-    organization: OrgKey,
+    organization: orgKey,
     apiKey: apiKey
   });
   const threadMessages = await openai.beta.threads.messages.create(
@@ -125,7 +124,7 @@ const postMessage = async (message, threadId) => {
 
 const createRun = async (threadId, assistantId) => {
   const openai = new OpenAI({
-    organization: OrgKey,
+    organization: orgKey,
     apiKey: apiKey
   });
   const run = await openai.beta.threads.runs.create(
@@ -138,7 +137,7 @@ const createRun = async (threadId, assistantId) => {
 
 const getRunStatus = async (threadId, runId) => {
   const openai = new OpenAI({
-    organization: OrgKey,
+    organization: orgKey,
     apiKey: apiKey
   });
   const run = await openai.beta.threads.runs.retrieve(
@@ -151,7 +150,7 @@ const getRunStatus = async (threadId, runId) => {
 
 const getThreadMessages = async (threadId) => {
   const openai = new OpenAI({
-    organization: OrgKey,
+    organization: orgKey,
     apiKey: apiKey
   });
   const threadMessages = await openai.beta.threads.messages.list(
@@ -163,7 +162,7 @@ const getThreadMessages = async (threadId) => {
 
 openAiService.chatWithAssitent = async (options) => {
   const openai = new OpenAI({
-    organization: OrgKey,
+    organization: orgKey,
     apiKey: apiKey
   });
   const weightage = await openai.chat.completions.create({
@@ -192,8 +191,8 @@ openAiService.chatWithAssitent = async (options) => {
     } else {
       mainPrompt = getInstructionsForHighQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
     }
-    // const assistantId = await createAssistant(mainPrompt);
-    const assistantId = 'asst_7SXXkhLkvNw3L5z4wRdFfz3p';
+    const assistantId = await createAssistant(mainPrompt);
+    // const assistantId = 'asst_7SXXkhLkvNw3L5z4wRdFfz3p';
     console.log({ pricedifferenceInPercentage })
     const messageId = await postMessage(options.message, threadId);
     const runId = await createRun(threadId, assistantId);

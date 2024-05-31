@@ -1,7 +1,8 @@
 import express from 'express'; 
+import { port, apiKey, orgKey } from './config/index.js';
   
 const app = express(); 
-const PORT = process.env.PORT;
+console.log(process.env.OPEN_AI_API_KEY, 'process.env')
 import openAiService from './src/index.js';
 
 app.use(express.json());
@@ -20,9 +21,9 @@ app.post('/message', async (req, res) => {
 })
 
   
-app.listen(PORT, (error) => { 
+app.listen(port, (error) => { 
     if(!error) 
-        console.log("Server is Successfully Running, and App is listening on port "+ PORT) 
+        console.log("Server is Successfully Running, and App is listening on port "+ port) 
     else 
         console.log("Error occurred, server can't start", error); 
     } 
