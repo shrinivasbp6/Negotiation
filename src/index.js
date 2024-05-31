@@ -23,9 +23,6 @@ const generateInstruction = (weightage) => {
 }
 
 const extractPriceDifferent = async (message, samples) => {
-  console.log('1111111111111111111111111111111111111111111111111111111111111')
-  console.log({ samples })
-  console.log('1111111111111111111111111111111111111111111111111111111111111')
   const prompt = `Bellow are the user message and the sample deals,
   Rule to follow
   1. please access and let me know what is the price user is quoting from the users message
@@ -62,12 +59,7 @@ const extractPriceDifferent = async (message, samples) => {
     messages: [{ role: "system", content: prompt }],
     model: "gpt-4o",
   });
-  console.log('************************************************************************************************')
-  console.log(res?.choices[0]?.message?.content)
-  console.log('************************************************************************************************')
   const responseText = res.choices[0].message.content;
-  console.log('Response:', responseText);
-
   // Parsing the response text to create an object
   const data = {};
   responseText.split('\n').forEach(line => {
@@ -105,7 +97,6 @@ const createThread = async () => {
     apiKey: apiKey
   });
   const emptyThread = await openai.beta.threads.create();
-  console.log({ emptyThread });
   return emptyThread.id
 }
 
@@ -118,7 +109,6 @@ const postMessage = async (message, threadId) => {
     threadId,
     { role: "user", content: message }
   );
-  console.log(threadMessages);
   return threadMessages.id;
 }
 
@@ -131,7 +121,6 @@ const createRun = async (threadId, assistantId) => {
     threadId,
     { assistant_id: assistantId }
   );
-  console.log('run', { run })
   return run.id
 }
 
@@ -144,7 +133,6 @@ const getRunStatus = async (threadId, runId) => {
     threadId,
     runId
   );
-  console.log('run2', { run })
   return run.status;
 }
 
@@ -156,7 +144,6 @@ const getThreadMessages = async (threadId) => {
   const threadMessages = await openai.beta.threads.messages.list(
     threadId
   );
-  console.log(threadMessages.data);
   return (threadMessages.data);
 }
 
@@ -178,11 +165,9 @@ openAiService.chatWithAssitent = async (values) => {
   let runStatus = undefined;
   if (values.message) {
     const prices = await extractPriceDifferent(values.message, sample?.choices[0]?.message?.content);
-    console.log(typeof prices, prices, prices["quotedPrice"], prices["targetPrice"])
     const pricedifferenceInPercentage = (+prices.quotedPrice / +prices.targetPrice) * 100;
     let mainPrompt = ``;
     let bot = `target price: ${prices.targetPrice} and choosen assistant`;
-    console.log('1111111111111111111111111111111111111111111111111111111111111111111111')
     if (pricedifferenceInPercentage > 130) {
       bot += '> 130'
       console.log(' > 130')
@@ -196,19 +181,18 @@ openAiService.chatWithAssitent = async (values) => {
       console.log(' < 110')
       mainPrompt = getInstructionsForHighQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
     }
-    console.log('1111111111111111111111111111111111111111111111111111111111111111111111')
     const assistantId = await createAssistant(mainPrompt);
-    console.log({ pricedifferenceInPercentage })
     const messageId = await postMessage(values.message, threadId);
     const runId = await createRun(threadId, assistantId);
     let count = 0;
     while (runStatus !== 'completed' && count < 10) {
+    console.log({runStatus, count})
       count += 1;
       runStatus = await getRunStatus(threadId, runId);
       setTimeout(() => {
-        console.log("this is the first message");
       }, 2000);
     }
+    console.log({runStatus, count})
     if (runStatus === 'completed') {
       const res = await getThreadMessages(threadId)
       console.log(res[0].content[0].text.value)
@@ -223,7 +207,6 @@ openAiService.chatWithAssitent = async (values) => {
 }
 
 openAiService.postNewMessage = async (values) => {
-  console.log({ values })
   let runStatus = undefined;
   const { message, threadId, assistantId } = values;
   if (message) {
@@ -234,13 +217,11 @@ openAiService.postNewMessage = async (values) => {
       count += 1;
       runStatus = await getRunStatus(threadId, runId);
       setTimeout(() => {
-        console.log("this is the first message");
       }, 2000);
     }
   }
   if (runStatus === 'completed') {
     const res = await getThreadMessages(threadId)
-    console.log(res[0].content[0].text.value)
     return { data: res, threadId, assistantId };
     // return res[0].content[0].text.value;
   }
@@ -251,9 +232,6 @@ openAiService.postNewMessage = async (values) => {
 
 openAiService.deleteAssistant = async (values) => {
   const { assistantId } = values;
-  console.log('22222222222222222222222222222222222222222222222222222222222222222')
-  console.log({assistantId})
-  console.log('22222222222222222222222222222222222222222222222222222222222222222')
   if (assistantId) {
     const openai = new OpenAI({
       organization: orgKey,
@@ -261,7 +239,6 @@ openAiService.deleteAssistant = async (values) => {
     });
 
     const response = await openai.beta.assistants.del(assistantId);
-    console.log(response);
     return response
   }
   return
