@@ -7,9 +7,9 @@ import openAiService from './src/index.js';
 
 app.use(express.json());
 
-app.get('/', async (req, res)=>{ 
+app.post('/', async (req, res)=>{ 
   res.status(200); 
-  const result = await openAiService.chatWithAssitent(req.query);
+  const result = await openAiService.chatWithAssitent(req.body);
   console.log({result})
   res.send(result); 
 }); 

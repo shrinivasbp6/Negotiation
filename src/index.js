@@ -160,7 +160,7 @@ const getThreadMessages = async (threadId) => {
   return (threadMessages.data);
 }
 
-openAiService.chatWithAssitent = async (options) => {
+openAiService.chatWithAssitent = async (values) => {
   const openai = new OpenAI({
     organization: orgKey,
     apiKey: apiKey
@@ -169,18 +169,15 @@ openAiService.chatWithAssitent = async (options) => {
     messages: [{ role: "system", content: weightAgePrompt }],
     model: "gpt-4o",
   });
-  console.log(weightage?.choices[0]?.message?.content);
   const sample = await openai.chat.completions.create({
     messages: [{ role: "system", content: samplePrompt }],
     model: "gpt-4o",
   });
-  console.log(sample?.choices[0]?.message?.content);
 
-  // const assistantId = await createAssistant(mainPrompt);
   const threadId = await createThread();
   let runStatus = undefined;
-  if (options.message) {
-    const prices = await extractPriceDifferent(options.message, sample?.choices[0]?.message?.content);
+  if (values.message) {
+    const prices = await extractPriceDifferent(values.message, sample?.choices[0]?.message?.content);
     console.log(typeof prices, prices, prices["quotedPrice"], prices["targetPrice"])
     const pricedifferenceInPercentage = (+prices.quotedPrice / +prices.targetPrice) * 100;
     let mainPrompt = ``;
@@ -192,9 +189,8 @@ openAiService.chatWithAssitent = async (options) => {
       mainPrompt = getInstructionsForHighQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
     }
     const assistantId = await createAssistant(mainPrompt);
-    // const assistantId = 'asst_7SXXkhLkvNw3L5z4wRdFfz3p';
     console.log({ pricedifferenceInPercentage })
-    const messageId = await postMessage(options.message, threadId);
+    const messageId = await postMessage(values.message, threadId);
     const runId = await createRun(threadId, assistantId);
     let count = 0;
     while (runStatus !== 'completed' && count < 10) {
@@ -207,7 +203,7 @@ openAiService.chatWithAssitent = async (options) => {
     if (runStatus === 'completed') {
       const res = await getThreadMessages(threadId)
       console.log(res[0].content[0].text.value)
-      return res[0].content[0].text.value;
+      return res;
     }
     return
   }
