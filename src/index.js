@@ -181,13 +181,22 @@ openAiService.chatWithAssitent = async (values) => {
     console.log(typeof prices, prices, prices["quotedPrice"], prices["targetPrice"])
     const pricedifferenceInPercentage = (+prices.quotedPrice / +prices.targetPrice) * 100;
     let mainPrompt = ``;
+    let bot = `target price: ${prices.targetPrice} and choosen assistant`;
+    console.log('1111111111111111111111111111111111111111111111111111111111111111111111')
     if (pricedifferenceInPercentage > 130) {
+      bot += '> 130'
+      console.log(' > 130')
       mainPrompt = getInstructionsForHighestQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
     } else if (pricedifferenceInPercentage < 130 && pricedifferenceInPercentage > 110) {
+      bot += '> 110 &&  <130'
+      console.log(' > 110 &&  <130')
       mainPrompt = getInstructionsForHigherQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
     } else {
+      bot += '< 110'
+      console.log(' < 110')
       mainPrompt = getInstructionsForHighQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
     }
+    console.log('1111111111111111111111111111111111111111111111111111111111111111111111')
     const assistantId = await createAssistant(mainPrompt);
     console.log({ pricedifferenceInPercentage })
     const messageId = await postMessage(values.message, threadId);
@@ -203,9 +212,13 @@ openAiService.chatWithAssitent = async (values) => {
     if (runStatus === 'completed') {
       const res = await getThreadMessages(threadId)
       console.log(res[0].content[0].text.value)
-      return res;
+      {
+        return { data: res, threadId, assistantId, meta: bot };
+      }
     }
-    return
+    return {
+      data: [], threadId, assistantId
+    }
   }
 }
 
@@ -228,8 +241,28 @@ openAiService.postNewMessage = async (values) => {
   if (runStatus === 'completed') {
     const res = await getThreadMessages(threadId)
     console.log(res[0].content[0].text.value)
-    return res
+    return { data: res, threadId, assistantId };
     // return res[0].content[0].text.value;
+  }
+  return {
+    data: [], threadId, assistantId
+  }
+}
+
+openAiService.deleteAssistant = async (values) => {
+  const { assistantId } = values;
+  console.log('22222222222222222222222222222222222222222222222222222222222222222')
+  console.log({assistantId})
+  console.log('22222222222222222222222222222222222222222222222222222222222222222')
+  if (assistantId) {
+    const openai = new OpenAI({
+      organization: orgKey,
+      apiKey: apiKey
+    });
+
+    const response = await openai.beta.assistants.del(assistantId);
+    console.log(response);
+    return response
   }
   return
 }
