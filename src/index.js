@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { apiKey, orgKey } from '../config/index.js';
+import { apiKey, orgKey, maxCount } from '../config/index.js';
 
 import { samplePrompt, weightAgePrompt } from './constants.js';
 import { getInstructionsForHighestQuotePrice, getInstructionsForHigherQuotePrice, getInstructionsForHighQuotePrice } from './helper.js';
@@ -185,7 +185,7 @@ openAiService.chatWithAssitent = async (values) => {
     const messageId = await postMessage(values.message, threadId);
     const runId = await createRun(threadId, assistantId);
     let count = 0;
-    while (runStatus !== 'completed' && count < 10) {
+    while (runStatus !== 'completed' && count < maxCount) {
     console.log({runStatus, count})
       count += 1;
       runStatus = await getRunStatus(threadId, runId);
@@ -213,7 +213,7 @@ openAiService.postNewMessage = async (values) => {
     const messageId = await postMessage(message, threadId);
     const runId = await createRun(threadId, assistantId);
     let count = 0;
-    while (runStatus !== 'completed' && count < 10) {
+    while (runStatus !== 'completed' && count < 20) {
       count += 1;
       runStatus = await getRunStatus(threadId, runId);
       setTimeout(() => {
