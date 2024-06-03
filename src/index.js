@@ -1,27 +1,18 @@
 import OpenAI from "openai";
 import { apiKey, orgKey, maxCount } from '../config/index.js';
 
-import { samplePrompt, weightAgePrompt } from './constants.js';
-import { getInstructionsForHighestQuotePrice, getInstructionsForHigherQuotePrice, getInstructionsForHighQuotePrice } from './helper.js';
+import { products } from './constants.js';
+import {
+  getInstructionsForHighestQuotePrice,
+  getInstructionsForHigherQuotePrice,
+  getInstructionsForHighQuotePrice,
+  generateWeightagePrompt,
+  generateSamplesPrompt
+} from './helper.js';
 
 const openAiService = {};
 
-
-console.log(process.env.OPEN_AI_API_KEY)
-const generateInstruction = (weightage) => {
-  const conditions = `
-  Quoted price is 2500$,
-  Till Quoted price comes below 130% negotiate only on price,
-  Reveal the target price as range (+/- 10%),
-  Then negotiate on other levers for 2 times
-  `;
-  return `
-  a)Negotiation weightage: 
-  ${weightage},
-  b) Process Condition as below: 
-  ${conditions}`
-}
-
+console.log(process.env.OPEN_AI_API_KEY);
 const extractPriceDifferent = async (message, samples) => {
   const prompt = `Bellow are the user message and the sample deals,
   Rule to follow
@@ -147,17 +138,29 @@ const getThreadMessages = async (threadId) => {
   return (threadMessages.data);
 }
 
+const getWeightagePrompt = (productId) => {
+  console.log({productId})
+  const product = products.find(item => item.id === productId);
+  console.log({product})
+  return generateWeightagePrompt(product)
+}
+
+const getSamplesPrompt = (productId, weightage) => {
+  const product = products.find(item => item.id === productId);
+  return generateSamplesPrompt(product, weightage)
+}
+
 openAiService.chatWithAssitent = async (values) => {
   const openai = new OpenAI({
     organization: orgKey,
     apiKey: apiKey
   });
   const weightage = await openai.chat.completions.create({
-    messages: [{ role: "system", content: weightAgePrompt }],
+    messages: [{ role: "system", content: getWeightagePrompt(values.productId) }],
     model: "gpt-4o",
   });
   const sample = await openai.chat.completions.create({
-    messages: [{ role: "system", content: samplePrompt }],
+    messages: [{ role: "system", content: getSamplesPrompt(values.productId, weightage?.choices[0]?.message?.content)}],
     model: "gpt-4o",
   });
 
@@ -186,13 +189,13 @@ openAiService.chatWithAssitent = async (values) => {
     const runId = await createRun(threadId, assistantId);
     let count = 0;
     while (runStatus !== 'completed' && count < maxCount) {
-    console.log({runStatus, count})
+      console.log({ runStatus, count })
       count += 1;
       runStatus = await getRunStatus(threadId, runId);
       setTimeout(() => {
       }, 2000);
     }
-    console.log({runStatus, count})
+    console.log({ runStatus, count })
     if (runStatus === 'completed') {
       const res = await getThreadMessages(threadId)
       console.log(res[0].content[0].text.value)
