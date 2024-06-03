@@ -37,19 +37,17 @@ export const getInstructionsForHighestQuotePrice = (weightage, sample) => {
      - Try negotiating minimum of 2 and maximum of 4 times, atleast one of these have to be agreed and a favourable conditions are reached.
      - If favourable condition reached then go to "Positive Closure" guidelines, otherwise go to "Closure halted"
   
-  5. **Positive Closure**
+   5. **Positive Closure**
      - Mention that we have noted all the details of the final offer. We are still evaluating other competitive offers and get back on the final deal soon. You can mention that the user/supplier can provide a better offer over the chat later as well.
-     - End the conversation with a summary. 
-  
+     - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title.
   6. **Closure halted**
      - Mention that the seller has not provided any additional benefits.
      - Reply on the lines of "Our senior procurement executive will reach out to you to negotiate further on accessories, warranty, free units, etc"
-     - End the conversation with a summary. 
-  
+     - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title.
   7. **Deal not favourable**
      - Mention that the seller's quoted price is significantly higher than the budget.
      - Reply on the lines of "Our senior procurement executive will reach out to you to discuss further on the pricing"
-     - End the conversation with a summary. 
+     - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title.
   
   
   **Favourable Sample Deals**
@@ -98,17 +96,15 @@ export const getInstructionsForHigherQuotePrice = (weightage, sample) => {
    
    5. **Positive Closure**
       - Mention that we have noted all the details of the final offer. We are still evaluating other competitive offers and get back on the final deal soon. You can mention that the user/supplier can provide a better offer over the chat later as well.
-      - End the conversation with a summary. 
-   
+      - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title.
    6. **Closure halted**
       - Mention that the seller has not provided any additional benefits.
       - Reply on the lines of "Our senior procurement executive will reach out to you to negotiate further on accessories, warranty, free units, etc"
-      - End the conversation with a summary. 
-   
+      - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title.
    7. **Deal not favourable**
-      - Mention that the seller's quoted price is higher than the budget.
+      - Mention that the seller's quoted price is significantly higher than the budget.
       - Reply on the lines of "Our senior procurement executive will reach out to you to discuss further on the pricing"
-      - End the conversation with a summary. 
+      - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title. 
    
    
    **Favourable Sample Deals**
@@ -156,23 +152,25 @@ Sample Prompt Template
    - Try negotiating minimum of 2 and maximum of 4 times, atleast one of these have to be agreed and a favourable conditions are reached.
    - If favourable condition reached then go to "Positive Closure" guidelines, otherwise go to "Closure halted"
 
-5. **Positive Closure**
+   5. **Positive Closure**
    - Mention that we have noted all the details of the final offer. We are still evaluating other competitive offers and get back on the final deal soon. You can mention that the user/supplier can provide a better offer over the chat later as well.
-   - End the conversation with a summary. 
-
+   - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title.
 6. **Closure halted**
    - Mention that the seller has not provided any additional benefits.
    - Reply on the lines of "Our senior procurement executive will reach out to you to negotiate further on accessories, warranty, free units, etc"
-   - End the conversation with a summary. 
-
-
+   - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title.
+7. **Deal not favourable**
+   - Mention that the seller's quoted price is significantly higher than the budget.
+   - Reply on the lines of "Our senior procurement executive will reach out to you to discuss further on the pricing"
+   - End the conversation with a detailed summary of the final offer from seller/user, it should include the final details of all levers proposed with the "summary" as the title.
+   
 **Favourable Sample Deals**
 
 ### Example 1
 ${sample}`
 }
 
-export const generateWeightagePrompt = (product) => 
+export const generateWeightagePrompt = (product) =>
    `Give realistic weightage to each negotiation lever based on the conditions mentioned
 a) Target unit price of category ${product.category} model ${product.model} from brand ${product.brand} are ${product.price} inr b) The negotiation levers are price, lead time, add-ons, AMC, payment terms, economies of scale c) The user has emphasized on the levers, add-ons and payment terms d) The user has a urgency to close the deal
 
@@ -187,7 +185,7 @@ Example output
 Be succinct, to the point`
 
 
-export const generateSamplesPrompt = (product, weightage) =>  `
+export const generateSamplesPrompt = (product, weightage) => `
 Take this information into account
 1. Target price: ${product.price},
 2. Product category: ${product.category},
