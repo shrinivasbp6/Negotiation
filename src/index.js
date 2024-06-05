@@ -77,7 +77,7 @@ const createAssistant = async (prompt) => {
     instructions: prompt,
     name: `Negotiation-Bot-${new Date()}`,
     tools: [{ type: "code_interpreter" }],
-    model: "gpt-3.5-turbo-16k-0613",
+    model: "gpt-4o",
   });
   return myAssistant.id
 }
@@ -138,29 +138,19 @@ const getThreadMessages = async (threadId) => {
   return (threadMessages.data);
 }
 
-const getWeightagePrompt = (productId) => {
-  console.log({productId})
-  const product = products.find(item => item.id === productId);
-  console.log({product})
-  return generateWeightagePrompt(product)
-}
-
-const getSamplesPrompt = (productId, weightage) => {
-  const product = products.find(item => item.id === productId);
-  return generateSamplesPrompt(product, weightage)
-}
-
 openAiService.chatWithAssitent = async (values) => {
   const openai = new OpenAI({
     organization: orgKey,
     apiKey: apiKey
   });
+  const product = products.find(item => item.id === values.productId);
+
   const weightage = await openai.chat.completions.create({
-    messages: [{ role: "system", content: getWeightagePrompt(values.productId) }],
+    messages: [{ role: "system", content: generateWeightagePrompt(product) }],
     model: "gpt-4o",
   });
   const sample = await openai.chat.completions.create({
-    messages: [{ role: "system", content: getSamplesPrompt(values.productId, weightage?.choices[0]?.message?.content)}],
+    messages: [{ role: "system", content: generateSamplesPrompt(product, weightage?.choices[0]?.message?.content)}],
     model: "gpt-4o",
   });
 
@@ -174,15 +164,15 @@ openAiService.chatWithAssitent = async (values) => {
     if (pricedifferenceInPercentage > 130) {
       bot += '> 130'
       console.log(' > 130')
-      mainPrompt = getInstructionsForHighestQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
+      mainPrompt = getInstructionsForHighestQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content, product);
     } else if (pricedifferenceInPercentage < 130 && pricedifferenceInPercentage > 110) {
       bot += '> 110 &&  <130'
       console.log(' > 110 &&  <130')
-      mainPrompt = getInstructionsForHigherQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
+      mainPrompt = getInstructionsForHigherQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content, product);
     } else {
       bot += '< 110'
       console.log(' < 110')
-      mainPrompt = getInstructionsForHighQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content);
+      mainPrompt = getInstructionsForHighQuotePrice(weightage?.choices[0]?.message?.content, sample?.choices[0]?.message?.content, product);
     }
     const assistantId = await createAssistant(mainPrompt);
     const messageId = await postMessage(values.message, threadId);
