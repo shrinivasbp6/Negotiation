@@ -395,7 +395,7 @@ function extractDataFromString(inputString) {
 }
 
 
-openAiService.suggestSuggestions = async (values) => {
+openAiService.suggestSuppliers = async (values) => {
   try {
     const threadId = await createThread();
     const messageId = await postMessage(JSON.stringify(values), threadId);
@@ -584,7 +584,7 @@ openAiService.chatWithAssitentForProductSearch = async (values) => {
     }
   } catch (err) {
     console.log({err})
-    throw new Error("No Product search happened!!!");
+    throw new Error("Product search didn't happen properly!!!");
   }
   console.log('response: ', response);
   return response;
@@ -614,12 +614,12 @@ openAiService.chatWithAssitentForCategorySearch = async values => {
         response.endOfThread = 1;
         console.log('Calling catgory api done!!');
         response.metaData.category = extractJSONFromString(_get(run[0], 'content[0].text.value'));
-        response.messages[0] = 'Thank you for your confirmation. Please go ahead for creating a Requisition.';
+        response.messages[0] = 'Thank you for your confirmation.';
       }
     }
   } catch (err) {
     console.log({err})
-    throw new Error("No Category search happened!!!");
+    throw new Error("Category search didn't happen properly!!!");
   }
   console.log('response in cate api: ', response);
   return response;

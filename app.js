@@ -44,7 +44,7 @@ app.post('/assistant/delete', async (req, res) => {
 
 app.post('/supplier-suggestions', async (req, res) => {
   console.log({req})
-  const result = await openAiService.suggestSuggestions(req.body);
+  const result = await openAiService.suggestSuppliers(req.body);
   res.send(result)
 });
 
