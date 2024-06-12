@@ -18,12 +18,17 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/', async (req, res)=>{ 
+  res.status(200); 
+    res.send("found"); 
+}); 
+
 app.post('/', async (req, res)=>{ 
   res.status(200); 
   const result = await openAiService.chatWithAssitent(req.body);
   console.log({result})
   res.send(result); 
-}); 
+});
 
 app.post('/message', async (req, res) => {
   console.log({req})
@@ -35,13 +40,46 @@ app.post('/assistant/delete', async (req, res) => {
   console.log({req})
   const result = await openAiService.deleteAssistant(req.body);
   res.send(result)
-})
+});
+
+app.post('/supplier-suggestions', async (req, res) => {
+  console.log({req})
+  const result = await openAiService.suggestSuggestions(req.body);
+  res.send(result)
+});
+
+app.post('/generate-sow', async (req, res) => {
+  console.log({req})
+  const result = await openAiService.generateSOW(req.body);
+  res.send(result)
+});
+
+app.post('/generate-questionnaire-and-cost-components', async (req, res) => {
+  console.log({req})
+  const result = await openAiService.generateQuestionnaireAndCostComponents(req.body);
+  res.send(result)
+});
+
+app.post('/product-search', async (req, res)=> {
+  const result = await openAiService.chatWithAssitentForProductSearch(req.body);
+  console.log({result})
+  res.status(200);
+  res.send(result); 
+});
+
+app.post('/category-search', async (req, res)=> {
+  const result = await openAiService.chatWithAssitentForCategorySearch(req.body);
+  console.log({result})
+  res.status(200);
+  res.send(result); 
+});
 
   
-app.listen(port, (error) => { 
+app.listen(port, (error) => {
     if(!error) 
         console.log("Server is Successfully Running, and App is listening on port "+ port) 
     else 
         console.log("Error occurred, server can't start", error); 
     } 
-); 
+);
+
